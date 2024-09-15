@@ -4,7 +4,11 @@ const ApiError = require("../utils/ApiError");
 exports.validate = (schema) => async (req, res, next) => {
   try {
     console.log("INSIDE VALIDATE MIDDLEWALRE");
-    const result = await schema.parseAsync(req.body);
+    const { success, data, error } = schema.safeParse(req.body);
+    console.log("success", success);
+    if (!success) {
+      throw new z.ZodError(error);
+    }
     next();
   } catch (error) {
     if (error instanceof z.ZodError) {

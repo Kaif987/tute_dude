@@ -7,17 +7,20 @@ const ApiResponse = require("../utils/ApiResponse");
 // @route   POST /api/v1/auth/register
 // @access  Public
 
-exports.register = asyncHandler(async (req, res) => {
-  if (await User.findOne({ email })) {
+exports.register = asyncHandler(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+
+  if (user) {
     throw new ApiError(400, "User already exists");
   }
 
-  const user = await User.create({
-    ...req.body,
+  const newUser = await User.create({ 
+    
   });
 
-  const newUser = await user.save();
-  sendTokenResponse(newUser, 200, res);
+  console.log("new user created", newUser);
+  await newUser.save();
+  sendTokenResponse(newUser, 201, res);
 });
 
 // @desc    Login user
@@ -55,6 +58,7 @@ exports.logout = (req, res) => {
 
 // Get token from model , create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
+  console.log("sendTokenResponse");
   const token = user.getSignedJwtToken();
 
   const options = {
