@@ -35,6 +35,12 @@ const UserSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+  outGoingFriendRequest: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
 
 // Encrypt password using bcrypt

@@ -2,12 +2,16 @@ const router = require("express").Router();
 const { protect } = require("../middleware/protect");
 const {
   sendFriendRequest,
-  getFriend,
+  searchFriend,
   deleteFriendRequest,
+  acceptFriendRequest,
+  unfriend,
 } = require("../controllers/friend");
 
 router.get("/send/:id", protect, sendFriendRequest);
 router.delete("/delete/:id", protect, deleteFriendRequest);
-router.get("/search/:id", protect, getFriend);
+router.post("/search", protect, searchFriend);
+router.get("/accept/:id", protect, acceptFriendRequest);
+router.get("/unfriend/:id", protect, unfriend);
 
 module.exports = router;
