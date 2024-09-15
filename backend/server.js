@@ -23,6 +23,7 @@ connectDb();
 // Route Files
 const auth = require("./routes/user");
 const friend = require("./routes/friend");
+const recommendation = require("./routes/recommendation");
 const { errorHandler } = require("./middleware/error.middleware");
 
 // Body Parser
@@ -48,6 +49,7 @@ app.get("/_health", (req, res) => {
 // Mount Routers
 app.use("/api/v1/auth", auth);
 app.use("/api/v1/friend", friend);
+app.use("/api/v1/recommendation", recommendation);
 
 // global middleware
 app.use(errorHandler);
