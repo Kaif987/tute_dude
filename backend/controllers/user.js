@@ -9,13 +9,12 @@ const ApiResponse = require("../utils/ApiResponse");
 
 exports.register = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });
-
   if (user) {
     throw new ApiError(400, "User already exists");
   }
 
-  const newUser = await User.create({ 
-    
+  const newUser = await User.create({
+    ...req.body,
   });
 
   console.log("new user created", newUser);
