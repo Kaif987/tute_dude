@@ -120,32 +120,44 @@ exports.sendFriendRequest = asyncHandler(async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
-  if (!user) {
+  try {
+    if (!user) {
+      await session.abortTransaction();
+      next(new ApiError(400, "User not found"));
+    }
+
+    if (!friend) {
+      await session.abortTransaction();
+      next(new ApiError(400, "Friend not found"));
+    }
+
+    await User.updateOne(
+      { _id: userId },
+      { $push: { outGoingFriendRequest: friendId } }
+    ).session(session);
+
+    await User.updateOne(
+      { _id: friendId },
+      { $push: { incomingFriendRequest: userId } }
+    ).session(session);
+
+    // Commit the transaction
+    await session.commitTransaction();
+
+    res.json(
+      new ApiResponse(true, 200, "Friend Request Sent Successfully", null)
+    );
+  } catch (error) {
     await session.abortTransaction();
-    next(new ApiError(400, "User not found"));
+    session.endSession();
+    return next(
+      new ApiError(
+        500,
+        "Something went wrong while sending the friend request",
+        error
+      )
+    );
   }
-
-  if (!friend) {
-    await session.abortTransaction();
-    next(new ApiError(400, "Friend not found"));
-  }
-
-  await User.updateOne(
-    { _id: userId },
-    { $push: { outGoingFriendRequest: friendId } }
-  ).session(session);
-
-  await User.updateOne(
-    { _id: friendId },
-    { $push: { incomingFriendRequest: userId } }
-  ).session(session);
-
-  // Commit the transaction
-  await session.commitTransaction();
-
-  res.json(
-    new ApiResponse(true, 200, "Friend Request Sent Successfully", null)
-  );
 });
 
 exports.acceptFriendRequest = asyncHandler(async (req, res, next) => {

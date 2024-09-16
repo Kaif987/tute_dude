@@ -17,7 +17,6 @@ exports.register = asyncHandler(async (req, res, next) => {
     ...req.body,
   });
 
-  console.log("new user created", newUser);
   await newUser.save();
   sendTokenResponse(newUser, 201, res);
 });
@@ -57,7 +56,6 @@ exports.logout = (req, res) => {
 
 // Get token from model , create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
-  console.log("sendTokenResponse");
   const token = user.getSignedJwtToken();
 
   const options = {

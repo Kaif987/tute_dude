@@ -1,6 +1,7 @@
 const router = require("express").Router();
-const { recommendation } = require("../controllers/recommendation");
+const { protect } = require("../middleware/protect.js");
+const { recommendFriends } = require("../controllers/recommendation");
 
-router.get("/", protect, recommendation);
+router.get("/", protect, recommendFriends);
 
 module.exports = router;

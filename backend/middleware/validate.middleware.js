@@ -3,7 +3,6 @@ const ApiError = require("../utils/ApiError");
 
 exports.validate = (schema) => async (req, res, next) => {
   try {
-    console.log("INSIDE VALIDATE MIDDLEWALRE");
     const result = await schema.parseAsync(req.body);
     next();
   } catch (error) {
