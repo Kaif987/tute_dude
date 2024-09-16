@@ -1,9 +1,23 @@
+import { Navigate, Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./components/custom/ProtectedRoute";
+import HomePage from "./pages/HomePage";
+import SignupPage from "./pages/SignupPage";
+import LoginPage from "./pages/LoginPage";
+
 function App() {
   return (
-    <div>
-      <h1>My App</h1>
-      <p>Welcome to my app!</p>
-    </div>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/signup" element={<SignupPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route element={<ProtectedRoute />}>
+        {/* <Route path='/admin/dashboard' element={<AdminDashboard />} /> */}
+        {/* <Route path='/project/update/:id' element={<UpdateProject />} /> */}
+      </Route>
+
+      {/* Redirect to home if no match */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
 }
 
