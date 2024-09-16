@@ -7,7 +7,7 @@ const asyncHandler = require("../utils/async");
 // @access  Private
 
 exports.recommendFriends = asyncHandler(async (req, res, next) => {
-  const userId = req.user._id; // Current logged-in user
+  const userId = req.user._id.toString(); // Current logged-in user
 
   // Fetch the current user's data, including their friends
   const user = await User.findById(userId).populate("friends", "_id friends");
@@ -16,16 +16,12 @@ exports.recommendFriends = asyncHandler(async (req, res, next) => {
     return next(new ApiError(404, "User not found"));
   }
 
-  const visited = new Set(); // To keep track of visited users (avoid recommending current friends)
+  const directFriends = new Set(
+    user.friends.map((friend) => friend._id.toString())
+  );
+  const visited = new Set([userId, ...directFriends]); // Mark user and direct friends as visited
   const recommendations = new Set(); // Store the recommended users
-  const queue = []; // Queue for BFS
-
-  // Mark current user as visited and add direct friends to queue
-  visited.add(userId);
-  user.friends.forEach((friend) => {
-    visited.add(friend._id.toString()); // Mark direct friends as visited
-    queue.push(friend._id); // Add direct friends to the queue
-  });
+  const queue = Array.from(directFriends); // Queue for BFS, start with direct friends
 
   // BFS to find friends of friends
   while (queue.length > 0) {
@@ -41,10 +37,14 @@ exports.recommendFriends = asyncHandler(async (req, res, next) => {
     currentFriend.friends.forEach((friendOfFriend) => {
       const friendOfFriendId = friendOfFriend._id.toString();
 
-      // If this person is not the user or one of their direct friends, add to recommendations
-      if (!visited.has(friendOfFriendId)) {
+      // If this person is not visited and not a direct friend, add to recommendations
+      if (
+        !visited.has(friendOfFriendId) &&
+        !directFriends.has(friendOfFriendId)
+      ) {
         recommendations.add(friendOfFriendId);
         visited.add(friendOfFriendId); // Mark them as visited
+        queue.push(friendOfFriendId); // Add to queue to explore their friends
       }
     });
   }
