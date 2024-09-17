@@ -1,3 +1,9 @@
+import AuthSignup from "../components/custom/AuthSignup";
+
 export default function SignupPage() {
-  return <div>SignupPage</div>;
+  return (
+    <main>
+      <AuthSignup />
+    </main>
+  );
 }

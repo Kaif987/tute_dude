@@ -1,3 +1,7 @@
+import AuthLogin from "../components/custom/AuthLogin";
+
 export default function LoginPage() {
-  return <div>LoginPage</div>;
+  return <main>
+    <AuthLogin />
+  </main>;
 }
