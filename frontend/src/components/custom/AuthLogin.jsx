@@ -17,7 +17,6 @@ function AuthLogin() {
 
   async function handleLogin(e) {
     e.preventDefault();
-    console.log({ email, password });
 
     const payload = {
       email,
@@ -25,7 +24,6 @@ function AuthLogin() {
     };
 
     const res = await auth.login(payload);
-    console.log("In login", res);
 
     if (res.success) {
       toast.success(res.message);

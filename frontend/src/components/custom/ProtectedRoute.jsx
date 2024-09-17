@@ -1,25 +1,19 @@
-import { Outlet } from "react-router-dom";
-// import { Navigate, Outlet } from "react-router-dom";
-// import useAuth from "../../hooks/useAuth";
+import useAuth from "@/hooks/useAuth";
+import { Navigate, Outlet } from "react-router-dom";
 
-const ProtectedRoute = () => {
-  //   const auth = useAuth();
+const ProtectedRoute = ({ children }) => {
+  const auth = useAuth();
+  console.log(auth.user); // null!!
 
-  //   if (auth.user) {
-  //     const token = localStorage.getItem("token");
-  //     if (token) {
-  //       const decodedToken = jwtDecode(token);
-  //       const expiryTime = decodedToken.exp! * 1000;
+  if (auth.requestStatus === "pending") {
+    return <h1>Loading...</h1>;
+  }
 
-  //       if (Date.now() >= expiryTime) {
-  //         auth.logout();
-  //         return <Navigate to='/login' />;
-  //       }
+  if (!auth.user) {
+    return <Navigate to="/login" />;
+  }
 
-  //       return <Outlet />;
-  //     }
-  //   }
-  return <Outlet />;
+  return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;

@@ -1,62 +1,96 @@
 import { api } from "@/lib/api";
-import { isAxiosError } from "axios";
-import { useState, createContext } from "react";
+import { useState, createContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext(null);
 
 export default function AuthContextProvider({ children }) {
-  const [user, setUser] = useState(
-    localStorage.getItem("user")
-      ? JSON.parse(localStorage.getItem("user"))
-      : null
-  );
-
-  const [token, setToken] = useState(localStorage.getItem("token") || "");
-
+  const [user, setUser] = useState(null);
+  const [requestStatus, setRequestStatus] = useState("pending");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const response = await api.get("/api/v1/auth/me");
+        const data = response.data;
+
+        const userData = {
+          id: data.data.id,
+          email: data.data.email,
+        };
+
+        if (userData) {
+          setUser(userData);
+          // Update the request status to signal you've finished fetching the user
+          setRequestStatus("complete");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    checkUser();
+  }, []);
 
   const login = async (userData) => {
     try {
-      const response = await api.post("/api/v1/auth/login", userData);
+      await api.post("/api/v1/auth/login", userData);
+      const response = await api.get("/api/v1/auth/me");
       const data = response.data;
-      console.log(data);
-
       if (data.success === true) {
-        setUser(data.user);
-        setToken(data.token);
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        return {
-          success: true,
-          message: data.message,
-        };
+        const userData = { id: data.data.id, email: data.data.email };
+        setUser(userData);
+        navigate("/");
+        return { success: true, message: data.message };
       } else {
         return {
           success: false,
           message: data.message,
         };
       }
-    } catch (e) {
-      // console.log(e);
-      if (isAxiosError(e) && e.response?.data) {
-        return { success: false, message: e.response.data.message };
-      } else {
-        return { success: false, message: "An error occurred" };
-      }
+    } catch {
+      console.log("catch block called");
+      throw new Error("Invalid Credentials");
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken("");
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login");
+  const register = async (userData) => {
+    try {
+      await api.post("/api/v1/auth/register", userData);
+      const response = await api.get("/api/v1/auth/me");
+      const data = response.data;
+
+      if (data.success === true) {
+        const userData = { id: data.data.id, email: data.data.email };
+        setUser(userData);
+        navigate("/");
+        return { success: true, message: data.message };
+      } else {
+        return {
+          success: false,
+          message: data.message,
+        };
+      }
+    } catch {
+      throw new Error("Invalid Credentials");
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await api.post("api/v1/auth/logout");
+      setUser(null);
+      navigate("/login");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, login, register, logout, requestStatus }}
+    >
       {children}
     </AuthContext.Provider>
   );

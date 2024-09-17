@@ -3,9 +3,9 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { api } from "../../lib/api";
 import toast from "react-hot-toast";
 import { QuoteComponent } from "./Quote";
+import useAuth from "@/hooks/useAuth";
 
 function AuthSignup() {
   const navigate = useNavigate();
@@ -20,6 +20,7 @@ function AuthSignup() {
   const [, setConfirmPassword] = useState("");
   const [isPasswordValid, setIsPasswordValid] = useState(true);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const auth = useAuth();
 
   function validatePasswordOnBlur() {
     setIsPasswordValid(password.length >= 8);
@@ -31,9 +32,9 @@ function AuthSignup() {
     setPasswordsMatch(confirmValue === password);
   };
 
-  function handleSignup(e) {
+  async function handleSignup(e) {
     e.preventDefault();
-    console.log("CALLED");
+
     if (!isPasswordValid) {
       return;
     }
@@ -50,20 +51,14 @@ function AuthSignup() {
       phone,
     };
 
-    api
-      .post("/api/v1/auth/register", payload)
-      .then((res) => {
-        console.log(res);
-        if (res.data.success) {
-          toast.success(res.data.message);
-          navigate("/");
-        } else {
-          toast.error(res.data.error);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    const res = await auth.register(payload);
+
+    if (res.success) {
+      toast.success(res.message);
+      navigate("/");
+    } else {
+      toast.error(res.message);
+    }
   }
 
   return (

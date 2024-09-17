@@ -6,14 +6,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { logoutUserApi } from "@/lib/api";
+import useAuth from "@/hooks/useAuth";
 import { LogOut } from "lucide-react";
 
 export default function ProfileDropdown() {
-  const handleLogout = async () => {
-    console.log("Logging out...");
-    await logoutUserApi();
-  };
+  const auth = useAuth();
+
+  function handleLogout() {
+    console.log("logout");
+    auth.logout();
+  }
 
   return (
     <DropdownMenu>

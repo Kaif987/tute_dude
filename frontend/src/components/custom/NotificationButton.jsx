@@ -1,13 +1,13 @@
-import { useState } from 'react'
-import { Bell } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { Bell } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { ScrollArea } from "@/components/ui/scroll-area"
+} from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // type Notification = {
 //   id: string
@@ -16,14 +16,12 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 export default function NotificationsDropdown() {
   const [notifications, setNotifications] = useState([
-    { id: '1', message: 'You have an incoming friend request from John Doe' },
-    { id: '2', message: 'Sarah shared a new post' },
-    { id: '3', message: 'Your comment received 5 likes' },
-  ])
+    { id: "1", message: "You have an incoming friend request from John Doe" },
+  ]);
 
   const clearNotification = (id) => {
-    setNotifications(notifications.filter(notif => notif.id !== id))
-  }
+    setNotifications(notifications.filter((notif) => notif.id !== id));
+  };
 
   return (
     <DropdownMenu>
@@ -41,11 +39,14 @@ export default function NotificationsDropdown() {
         <ScrollArea className="h-[300px]">
           {notifications.length > 0 ? (
             notifications.map((notification) => (
-              <DropdownMenuItem key={notification.id} className="flex items-center justify-between p-4">
+              <DropdownMenuItem
+                key={notification.id}
+                className="flex items-center justify-between p-4"
+              >
                 <span className="mr-2">{notification.message}</span>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => clearNotification(notification.id)}
                 >
                   Clear
@@ -60,5 +61,5 @@ export default function NotificationsDropdown() {
         </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
