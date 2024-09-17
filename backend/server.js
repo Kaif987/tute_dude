@@ -10,7 +10,12 @@ const connectDb = require("./config/db");
 const xss = require("xss-clean");
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.options("*", cors());
 
 // load env vars

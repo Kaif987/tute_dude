@@ -52,7 +52,7 @@ exports.recommendFriends = asyncHandler(async (req, res, next) => {
   // Fetch the details of recommended friends to display
   const recommendedFriends = await User.find({
     _id: { $in: Array.from(recommendations) },
-  }).select("firstName lastName email");
+  }).select("_id username hobbies phoneNumber email");
 
   res
     .status(200)

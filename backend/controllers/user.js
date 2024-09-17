@@ -54,6 +54,20 @@ exports.logout = (req, res) => {
     .json(new ApiResponse(true, 200, "User logged out successfully", null));
 };
 
+// @desc    Get user details
+// @route   GET /api/v1/auth/me
+// @access  Private
+
+exports.me = (req, res) => {
+  const data = {
+    id: req.user._id,
+    name: req.user.username,
+    email: req.user.email,
+  };
+
+  res.status(200).json(new ApiResponse(true, 200, "User details", data));
+};
+
 // Get token from model , create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
   const token = user.getSignedJwtToken();
@@ -77,6 +91,7 @@ const sendTokenResponse = (user, statusCode, res) => {
     .cookie("token", token, options) // key , value ,options
     .json({
       success: true,
+      message: "User created successfully",
       token,
     });
 };

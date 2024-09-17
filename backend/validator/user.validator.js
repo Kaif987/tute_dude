@@ -1,14 +1,11 @@
 const z = require("zod");
 
 exports.signupSchema = z.object({
-  firstName: z
-    .string({ required_error: "First name is required" })
-    .min(2, "First name must be at least 2 characters")
-    .max(20, "First name must not be more than 20 characters"),
-  lastName: z
-    .string({ required_error: "Last name is required" })
-    .min(2, "Last name must be at least 2 characters")
-    .max(20, "Last name must not be more than 20 characters"),
+  username: z
+    .string({ required_error: "Username is required" })
+    .min(2, "Username must be at least 2 characters")
+    .max(20, "Username must not be more than 20 characters"),
+  hobbies: z.array(z.string()).optional(),
   email: z.string({ required_error: "Email is required" }).email(),
   password: z
     .string()

@@ -12,22 +12,17 @@ exports.searchFriend = asyncHandler(async (req, res, next) => {
   const { searchQuery } = req.body;
   const userId = req.user._id; // The ID of the logged-in user
 
-  if (!searchQuery || searchQuery.trim() === "") {
-    return next(new ApiError(400, "Search query cannot be empty"));
-  }
-
   // Use a regular expression to perform a case-insensitive search
   const searchRegex = new RegExp(searchQuery, "i");
 
-  // Search for users whose firstName, lastName, or email match the query
+  // Search for users whose username or email match the query
   const users = await User.find({
-    _id: { $ne: userId }, // Exclude the logged-in user from the search results
+    _id: { $ne: userId, $nin: req.user.friends }, // Exclude the logged-in user from the search results
     $or: [
-      { firstName: { $regex: searchRegex } },
-      { lastName: { $regex: searchRegex } },
+      { username: { $regex: searchRegex } },
       { email: { $regex: searchRegex } },
     ],
-  }).select("firstName lastName email phoneNumber");
+  }).select("_id username hobbies email phoneNumber");
 
   if (!users.length) {
     return res.status(404).json({
@@ -282,4 +277,17 @@ exports.unfriend = asyncHandler(async (req, res, next) => {
       new ApiError(500, "Something went wrong while unfriending the user")
     );
   }
+});
+
+exports.getFriends = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+
+  const user = await User.findById(userId).populate(
+    "friends",
+    "_id username hobbies email phoneNumber"
+  );
+
+  res
+    .status(200)
+    .json(new ApiResponse(true, 200, "User Friends found", user.friends));
 });
