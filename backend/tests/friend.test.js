@@ -15,20 +15,17 @@ describe("Friend API", () => {
 
     // Create test users
     user1 = await User.create({
-      firstName: "User",
-      lastName: "One",
+      username: "UserOne",
       email: "user1@example.com",
       password: "Password123",
     });
     user2 = await User.create({
-      firstName: "User",
-      lastName: "Two",
+      username: "UserTwo",
       email: "user2@example.com",
       password: "Password123",
     });
     user3 = await User.create({
-      firstName: "User",
-      lastName: "Three",
+      username: "UserThree",
       email: "user3@example.com",
       password: "Password123",
     });

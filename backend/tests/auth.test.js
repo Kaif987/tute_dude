@@ -16,8 +16,7 @@ describe("Authentication API", () => {
   describe("POST /api/v1/auth/register", () => {
     it("should register a new user", async () => {
       const res = await request(app).post("/api/v1/auth/register").send({
-        firstName: "Test",
-        lastName: "User",
+        username: "testuser",
         email: "testuser@example.com",
         password: "Password123",
       });
@@ -28,8 +27,7 @@ describe("Authentication API", () => {
 
     it("should not register a user with an existing email", async () => {
       const res = await request(app).post("/api/v1/auth/register").send({
-        firstName: "Another",
-        lastName: "User",
+        username: "testuser2",
         email: "testuser@example.com",
         password: "Password123",
       });
@@ -40,8 +38,7 @@ describe("Authentication API", () => {
 
     it("should not register a user with invalid data", async () => {
       const res = await request(app).post("/api/v1/auth/register").send({
-        firstName: "T",
-        lastName: "U",
+        username: "testuser3",
         email: "invalid-email",
         password: "weak",
       });

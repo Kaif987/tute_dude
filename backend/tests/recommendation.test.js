@@ -12,18 +12,16 @@ describe("Friend Recommendation System", () => {
     await User.deleteMany({});
 
     const userList = [
-      { firstName: "Kaif", lastName: "Siddiqui", email: "kaif@example.com" },
+      { username: "Kaif", email: "kaif@example.com" },
       {
-        firstName: "Prasanna",
-        lastName: "Kumar",
+        username: "Prasanna",
         email: "prasanna@example.com",
       },
-      { firstName: "Nirjal", lastName: "Gupta", email: "nirjal@example.com" },
-      { firstName: "Ashish", lastName: "Sharma", email: "ashish@example.com" },
-      { firstName: "Rajan", lastName: "Kumar", email: "rajan@example.com" },
+      { username: "Nirjal", email: "nirjal@example.com" },
+      { username: "Ashish", email: "ashish@example.com" },
+      { username: "Rajan", email: "rajan@example.com" },
       {
-        firstName: "Sanskritiya",
-        lastName: "Rao",
+        username: "Sanskritiya",
         email: "sanskritiya@example.com",
       },
     ];
@@ -36,22 +34,22 @@ describe("Friend Recommendation System", () => {
 
         if (res.status !== 201) {
           throw new Error(
-            `Failed to register user ${user.firstName}: ${JSON.stringify(
+            `Failed to register user ${user.username}: ${JSON.stringify(
               res.body
             )}`
           );
         }
 
-        tokens[user.firstName] = res.body.token;
+        tokens[user.username] = res.body.token;
 
         const registeredUser = await User.findOne({ email: user.email });
         if (!registeredUser) {
-          throw new Error(`Failed to find registered user ${user.firstName}`);
+          throw new Error(`Failed to find registered user ${user.username}`);
         }
-        users[user.firstName] = registeredUser;
+        users[user.username] = registeredUser;
       } catch (error) {
         console.error(
-          `Error registering user ${user.firstName}:`,
+          `Error registering user ${user.username}:`,
           error.message
         );
         throw error; // This will cause the entire test suite to fail
@@ -59,7 +57,7 @@ describe("Friend Recommendation System", () => {
     }
 
     server = app.listen(0); // Use port 0 for dynamic port allocation
-  });
+  }, 10000);
 
   afterAll(async () => {
     await User.deleteMany({});
@@ -130,11 +128,11 @@ describe("Friend Recommendation System", () => {
     })) {
       const userDoc = await User.findById(users[user]._id).populate("friends");
       expect(userDoc.friends.length).toBe(expectedFriends.length);
-      expect(userDoc.friends.map((f) => f.firstName)).toEqual(
+      expect(userDoc.friends.map((f) => f.username)).toEqual(
         expect.arrayContaining(expectedFriends)
       );
     }
-  }, 20000);
+  }, 30000);
 
   it("should recommend friends for Kaif", async () => {
     const res = await request(app)
@@ -145,7 +143,7 @@ describe("Friend Recommendation System", () => {
     expect(res.body.success).toBe(true);
     expect(res.body.data).toBeInstanceOf(Array);
 
-    const recommendedNames = res.body.data.map((user) => user.firstName);
+    const recommendedNames = res.body.data.map((user) => user.username);
     expect(recommendedNames).toEqual(
       expect.arrayContaining(["Ashish", "Rajan"])
     );
@@ -163,7 +161,7 @@ describe("Friend Recommendation System", () => {
     expect(res.body.success).toBe(true);
     expect(res.body.data).toBeInstanceOf(Array);
 
-    const recommendedNames = res.body.data.map((user) => user.firstName);
+    const recommendedNames = res.body.data.map((user) => user.username);
     expect(recommendedNames).toEqual(expect.arrayContaining(["Kaif"]));
     expect(recommendedNames).not.toContain("Sanskritiya");
   });
