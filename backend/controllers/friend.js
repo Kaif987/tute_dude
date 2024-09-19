@@ -16,20 +16,33 @@ exports.searchFriend = asyncHandler(async (req, res, next) => {
   const searchRegex = new RegExp(searchQuery, "i");
 
   // Search for users whose username or email match the query
-  const users = await User.find({
-    _id: { $ne: userId, $nin: req.user.friends }, // Exclude the logged-in user from the search results
+  let users = await User.find({
+    _id: { $ne: userId, $nin: req.user.friends }, // Exclude the logged-in user and user friends from the search results
     $or: [
       { username: { $regex: searchRegex } },
       { email: { $regex: searchRegex } },
     ],
-  }).select("_id username hobbies email phoneNumber");
+  })
+    .select("_id username hobbies email phoneNumber")
+    .lean();
 
   if (!users.length) {
-    return res.status(404).json({
-      success: false,
-      message: "No users found with the given search query",
+    return res.status(200).json({
+      success: true,
+      data: [],
     });
   }
+
+  // also add a property to each user indicating if logged-in user has sent a friend request to them
+  // also exclude users who have sent a friend request to the logged-in user
+
+  users = users.map((user) => {
+    return {
+      ...user,
+      friendRequestSent: req.user.outGoingFriendRequest.includes(user._id),
+      friendRequestReceived: req.user.incomingFriendRequest.includes(user._id),
+    };
+  });
 
   // Return the matching users
   res.status(200).json({
@@ -160,7 +173,9 @@ exports.acceptFriendRequest = asyncHandler(async (req, res, next) => {
   const userId = req.user._id; // The ID of the logged-in user accepting the request
 
   const user = await User.findById(userId);
-  const friend = await User.findById(friendId);
+  const friend = await User.findById(friendId).select(
+    "_id username hobbies email phoneNumber"
+  );
 
   if (!user) {
     return next(new ApiError(404, "User not found"));
@@ -209,10 +224,9 @@ exports.acceptFriendRequest = asyncHandler(async (req, res, next) => {
     await session.commitTransaction();
     session.endSession();
 
-    res.status(200).json({
-      success: true,
-      message: "Friend request accepted successfully",
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(true, 200, "Friend request accepted", friend));
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
