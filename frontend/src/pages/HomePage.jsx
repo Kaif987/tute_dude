@@ -1,17 +1,25 @@
 import Navbar from "@/components/custom/Navbar";
 import FriendCard from "@/components/custom/FriendCard";
+import OtherUser from "@/components/custom/OtherUser";
 import { api } from "@/lib/api";
 import { useEffect, useState } from "react";
+import { useDebouncedValue } from "@/lib/utils";
+import toast from "react-hot-toast";
 
 export default function HomePage() {
   const [registeredUsers, setRegisteredUsers] = useState([]);
   const [suggestedFriends, setSuggestedFriends] = useState([]);
   const [myFriends, setMyFriends] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebouncedValue(searchQuery);
+
+  const onSearch = (value) => {
+    setSearchQuery(value);
+  };
 
   useEffect(() => {
     fetchRegisteredUser();
-  }, [searchQuery]);
+  }, [debouncedSearch]);
 
   useEffect(() => {
     getSuggestedFriends();
@@ -35,25 +43,61 @@ export default function HomePage() {
     setSuggestedFriends(response.data.data);
   };
 
-  const onSearch = (value) => {
-    setSearchQuery(value);
+  const sendFriendRequest = async (id) => {
+    const response = await api.get(`/api/v1/friend/send/${id}`);
+    const data = response.data;
+
+    if (data.success) {
+      console.log("Friend request sent successfully");
+      toast("Friend request sent successfully", {
+        icon: "👋",
+      });
+    }
+  };
+
+  const unfriend = async (id) => {
+    const response = await api.get(`/api/v1/friend/unfriend/${id}`);
+    const data = response.data;
+    if (data.success) {
+      toast("Unfriended Successfully", {
+        icon: "👋",
+      });
+    }
+
+    setMyFriends((prev) => prev.filter((friend) => friend._id !== id));
+  };
+
+  const acceptFriendRequest = async (id) => {
+    const response = await api.get(`/api/v1/friend/accept/${id}`);
+    const data = response.data;
+    if (data.success) {
+      toast("Friend Request Accepted", {
+        icon: "👋",
+      });
+
+      setMyFriends((prev) => [...prev, data.data]);
+      setRegisteredUsers((prev) => prev.filter((user) => user._id !== id));
+    }
   };
 
   return (
     <div className="mx-auto py-4 container max-w-7xl">
       <Navbar onSearch={onSearch} searchQuery={searchQuery} />
+      {/* <Navbar /> */}
       <div className="flex gap-9 mt-10">
         <div>
           <div className="">
             <h1 className="text-xl font-bold py-4">Other Users on this app</h1>
             <div className="flex flex-col gap-4 max-w-3xl overflow-x-scroll sm:flex-row">
+              {registeredUsers.length === 0 && <p>No registered users found</p>}
               {registeredUsers &&
                 registeredUsers.map((user) => (
-                  <FriendCard
+                  <OtherUser
                     key={user._id}
                     user={user}
-                    isFriend={false}
                     id={user._id}
+                    onSendFriendRequest={sendFriendRequest}
+                    onAcceptFriendRequest={acceptFriendRequest}
                   />
                 ))}
             </div>
@@ -64,7 +108,11 @@ export default function HomePage() {
               {suggestedFriends.length === 0 && <p>No suggested friends</p>}
               {suggestedFriends &&
                 suggestedFriends.map((user) => (
-                  <FriendCard key={user._id} user={user} isFriend={false} />
+                  <OtherUser
+                    key={user._id}
+                    user={user}
+                    onSendFriendRequest={sendFriendRequest}
+                  />
                 ))}
             </div>
           </div>
@@ -78,8 +126,8 @@ export default function HomePage() {
                 <FriendCard
                   key={friend._id}
                   user={friend}
-                  isFriend={true}
                   id={friend._id}
+                  onUnfriend={unfriend}
                 />
               ))}
           </div>

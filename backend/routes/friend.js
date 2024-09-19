@@ -7,6 +7,7 @@ const {
   acceptFriendRequest,
   unfriend,
   getFriends,
+  getFriendRequests,
 } = require("../controllers/friend");
 
 router.get("/send/:id", protect, sendFriendRequest);
@@ -15,5 +16,6 @@ router.post("/search", protect, searchFriend);
 router.get("/accept/:id", protect, acceptFriendRequest);
 router.get("/unfriend/:id", protect, unfriend);
 router.get("/my-friends", protect, getFriends);
+router.get("/friend-request", protect, getFriendRequests);
 
 module.exports = router;

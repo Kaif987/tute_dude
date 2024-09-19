@@ -1,11 +1,14 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { useDebouncedValue } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 export default function SearchBar({ onSearch, searchQuery }) {
+  const debouncedSearch = useDebouncedValue(searchQuery, 500);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSearch(searchQuery);
   };
 
   return (

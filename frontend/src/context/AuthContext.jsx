@@ -12,6 +12,7 @@ export default function AuthContextProvider({ children }) {
   useEffect(() => {
     const checkUser = async () => {
       try {
+        setRequestStatus("pending");
         const response = await api.get("/api/v1/auth/me");
         const data = response.data;
 
@@ -23,10 +24,11 @@ export default function AuthContextProvider({ children }) {
         if (userData) {
           setUser(userData);
           // Update the request status to signal you've finished fetching the user
-          setRequestStatus("complete");
         }
       } catch (error) {
         console.log(error);
+      } finally {
+        setRequestStatus("complete");
       }
     };
 
@@ -35,6 +37,7 @@ export default function AuthContextProvider({ children }) {
 
   const login = async (userData) => {
     try {
+      setRequestStatus("pending");
       await api.post("/api/v1/auth/login", userData);
       const response = await api.get("/api/v1/auth/me");
       const data = response.data;
@@ -52,11 +55,14 @@ export default function AuthContextProvider({ children }) {
     } catch {
       console.log("catch block called");
       throw new Error("Invalid Credentials");
+    } finally {
+      setRequestStatus("complete");
     }
   };
 
   const register = async (userData) => {
     try {
+      setRequestStatus("pending");
       await api.post("/api/v1/auth/register", userData);
       const response = await api.get("/api/v1/auth/me");
       const data = response.data;
@@ -74,16 +80,21 @@ export default function AuthContextProvider({ children }) {
       }
     } catch {
       throw new Error("Invalid Credentials");
+    } finally {
+      setRequestStatus("complete");
     }
   };
 
   const logout = async () => {
     try {
+      setRequestStatus("pending");
       await api.post("api/v1/auth/logout");
       setUser(null);
       navigate("/login");
     } catch (error) {
       console.log(error);
+    } finally {
+      setRequestStatus("complete");
     }
   };
 

@@ -13,4 +13,5 @@ export const registerUserApi = (userData) =>
 
 export const loginUserApi = (userData) =>
   api.post("/api/v1/auth/login", userData);
+
 export const logoutUserApi = () => api.post("/api/v1/auth/logout");

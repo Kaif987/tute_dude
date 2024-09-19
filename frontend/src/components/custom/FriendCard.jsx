@@ -1,31 +1,14 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { api } from "@/lib/api";
-import { UserPlus } from "lucide-react";
-import toast from "react-hot-toast";
+import { useState } from "react";
 
-export default function Component({ user, isFriend, id }) {
-  const sendFriendRequest = async () => {
-    const response = await api.get(`/api/v1/friend/send/${id}`);
-    const data = response.data;
-
-    if (data.success) {
-      console.log("Friend request sent successfully");
-      toast("Friend request sent successfully", {
-        icon: "👋",
-      });
-    }
-  };
+export default function Component({ user, id, onUnfriend }) {
+  const [unfriendStatus, setUnfriendStatus] = useState(false);
 
   const unfriend = async () => {
-    const response = await api.get(`/api/v1/friend/unfriend/${id}`);
-    const data = response.data;
-    if (data.success) {
-      toast("Unfriended Successfully", {
-        icon: "👋",
-      });
-    }
+    await onUnfriend(id);
+    setUnfriendStatus(true);
   };
 
   return (
@@ -38,16 +21,9 @@ export default function Component({ user, isFriend, id }) {
         <h2 className="mt-4 text-xl font-semibold">{user?.username}</h2>
       </CardContent>
       <CardFooter>
-        {isFriend ? (
-          <Button className="w-full" onClick={unfriend}>
-            Unfriend
-          </Button>
-        ) : (
-          <Button className="w-full" onClick={sendFriendRequest}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Send Friend Request
-          </Button>
-        )}
+        <Button className="w-full" onClick={unfriend} disabled={unfriendStatus}>
+          {unfriendStatus ? "Unfriended" : "Unfriend"}
+        </Button>
       </CardFooter>
     </Card>
   );

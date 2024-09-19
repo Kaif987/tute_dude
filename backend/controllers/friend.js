@@ -305,3 +305,29 @@ exports.getFriends = asyncHandler(async (req, res, next) => {
     .status(200)
     .json(new ApiResponse(true, 200, "User Friends found", user.friends));
 });
+
+exports.getFriendRequests = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+
+  const user = await User.findById(userId).populate(
+    "incomingFriendRequest",
+    "_id username hobbies email phoneNumber"
+  );
+
+  if (!user.incomingFriendRequest.length) {
+    return res
+      .status(200)
+      .json(new ApiResponse(true, 200, "No friend requests found", []));
+  }
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        true,
+        200,
+        "User friend requests found",
+        user.incomingFriendRequest
+      )
+    );
+});

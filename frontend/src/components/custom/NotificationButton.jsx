@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,20 +8,65 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-// type Notification = {
-//   id: string
-//   message: string
-// }
+import { api } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function NotificationsDropdown() {
-  const [notifications, setNotifications] = useState([
-    { id: "1", message: "You have an incoming friend request from John Doe" },
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
   const clearNotification = (id) => {
     setNotifications(notifications.filter((notif) => notif.id !== id));
   };
+
+  const acceptFriendRequest = async (id) => {
+    const response = await api.get(`/api/v1/friend/accept/${id}`);
+    if (response.success) {
+      toast("Friend request accepted successfully", {
+        icon: "👋",
+      });
+    }
+    clearNotification(id);
+  };
+
+  const declineFriendRequest = async (id) => {
+    const response = await api.get(`/api/v1/friend/decline/${id}`);
+    if (response.success) {
+      toast("Friend request declined successfully", {
+        icon: "👋",
+      });
+    }
+    clearNotification(id);
+  };
+
+  const fetchFriendRequests = async () => {
+    const response = await api.get("/api/v1/friend/friend-request");
+    const data = response.data;
+
+    if (data.success) {
+      if (!data) {
+        return;
+      }
+
+      const notificationObject = data.data.map((item) => {
+        return {
+          id: item._id,
+          message: "Incoming friend request from" + item.username,
+        };
+      });
+      console.log(notificationObject);
+      setNotifications(notificationObject);
+    }
+  };
+
+  useEffect(() => {
+    const internal = setInterval(() => {
+      fetchFriendRequests();
+    }, 5000);
+
+    return () => {
+      clearInterval(internal);
+    };
+  }, []);
 
   return (
     <DropdownMenu>
@@ -45,11 +90,18 @@ export default function NotificationsDropdown() {
               >
                 <span className="mr-2">{notification.message}</span>
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
-                  onClick={() => clearNotification(notification.id)}
+                  onClick={() => acceptFriendRequest(notification.id)}
                 >
-                  Clear
+                  Accept
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => declineFriendRequest(notification.id)}
+                >
+                  Decline
                 </Button>
               </DropdownMenuItem>
             ))

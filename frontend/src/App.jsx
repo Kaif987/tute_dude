@@ -13,10 +13,10 @@ function App() {
       <Routes>
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/user/:id" element={<UserProfile />} />
-        </Route>
+        {/* <Route element={<ProtectedRoute />}> */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/user/:id" element={<UserProfile />} />
+        {/* </Route> */}
         {/* Redirect to home if no match */}
         {/* <Route path="*" element={<Navigate to="/" />} /> */}
       </Routes>
